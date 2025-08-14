@@ -12,14 +12,14 @@ import json
 import os
 from services.ultra_detailed_analysis_engine import ultra_detailed_analysis_engine
 from services.auto_save_manager import auto_save_manager, salvar_etapa, salvar_erro
-from services.super_orchestrator import super_orchestrator # Import the Super Orchestrator
+from services.super_orchestrator import SuperOrchestrator
 
 logger = logging.getLogger(__name__)
 
 analysis_bp = Blueprint('analysis', __name__)
 
 # Instancia o Super Orchestrator
-orchestrator = super_orchestrator
+orchestrator = SuperOrchestrator()
 
 # Armazena sessões ativas
 active_sessions = {}

@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 ARQV30 Enhanced v2.0 - Enhanced Analysis Orchestrator
 Orquestrador aprimorado que integra agentes psicológicos
@@ -297,29 +295,7 @@ class EnhancedAnalysisOrchestrator:
 **Cobertura de Objeções:**
 - Universais: {analysis.get('metricas_forenses_detalhadas', {}).get('cobertura_objecoes', {}).get('universais_cobertas', 0)}/3
 - Ocultas: {analysis.get('metricas_forenses_detalhadas', {}).get('cobertura_objecoes', {}).get('ocultas_identificadas', 0)}/5
-
-    def _generate_deep_psychological_layers(self, avatar_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Gera camadas psicológicas profundas"""
-        return {
-            'camada_consciente': {
-                'desejos_expressos': avatar_data.get('desejos_secretos', [])[:3],
-                'objecoes_verbalizadas': avatar_data.get('muralhas_desconfianca_objecoes', [])[:3],
-                'motivacoes_declaradas': avatar_data.get('motivacoes_principais', [])[:3]
-            },
-            'camada_subconsciente': {
-                'medos_ocultos': ['Medo do fracasso', 'Medo do julgamento', 'Medo da mudança'],
-                'desejos_reprimidos': ['Reconhecimento', 'Segurança', 'Liberdade'],
-                'crencas_limitantes': ['Não sou capaz', 'É muito difícil', 'Não mereço']
-            },
-            'camada_inconsciente': {
-                'padroes_familiares': ['Modelos de sucesso da família'],
-                'traumas_profissionais': ['Experiências negativas passadas'],
-                'arquétipos_dominantes': ['O Herói', 'O Sábio', 'O Criador']
-            }
-        }
-
-    def _identify_hidden_behavioral_patterns(self, avatar_data: Dict[str, Any]) -> List[str]:
-        """Identifica padrões comportamentais ocultos"""
+"""
         return [
             'Procrastinação em decisões importantes',
             'Busca por validação externa constante',
@@ -403,39 +379,15 @@ class EnhancedAnalysisOrchestrator:
                 'script': 'Com X anos resolvendo exatamente este problema...'
             },
             'alavanca_escassez': {
-                'tipo': 'Oportunidade temporal limitada',
-                'aplicacao': 'Criar urgência genuína',
-                'script': 'Esta janela está aberta apenas até...'
+                'tipo': 'Oportunidade limitada',
+                'aplicacao': 'Criar senso de urgência',
+                'script': 'Restam apenas Y vagas/unidades...'
             },
             'alavanca_prova_social': {
-                'tipo': 'Casos de pessoas similares',
-                'aplicacao': 'Reduzir risco percebido',
-                'script': 'Profissionais exatamente como você conseguiram...'
+                'tipo': 'Validação de pares',
+                'aplicacao': 'Mostrar resultados de outros clientes',
+                'script': 'Veja como Z clientes transformaram seus negócios...'
             }
         }
 
-    def _fallback_avatar(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Avatar básico como fallback"""
-        return {
-            'nome': 'Avatar Básico',
-            'segmento': data.get('segmento', 'Não especificado'),
-            'dores_principais': ['Crescimento lento', 'Falta de sistema', 'Concorrência alta'],
-            'desejos_principais': ['Crescimento rápido', 'Mais clientes', 'Mais lucro']
-        }
 
-
-### ✅ GARANTIAS ARQUEOLÓGICAS
-
-- **Zero Simulação:** 100% dados reais escavados
-- **Análise Visceral:** Dores e desejos profundos mapeados
-- **Arsenal Completo:** Drivers + PROVIs + Anti-Objeção + Pré-Pitch
-- **Implementação Pronta:** Scripts e roteiros detalhados
-
----
-*Análise arqueológica realizada por agentes especializados em persuasão visceral*
-"""
-
-        return report
-
-# Instância global
-enhanced_orchestrator = EnhancedAnalysisOrchestrator()
