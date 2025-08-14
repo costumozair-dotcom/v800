@@ -151,6 +151,40 @@ class AntiObjectionSystem:
             }
         }
     
+    def generate_comprehensive_objections(
+        self, 
+        objections_list: List[str], 
+        avatar_data: Dict[str, Any], 
+        context_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Gera sistema abrangente de contra-objeções"""
+        
+        logger.info("🛡️ Gerando sistema abrangente de contra-objeções...")
+        
+        try:
+            # Usa o sistema completo
+            complete_system = self.generate_complete_anti_objection_system(objections_list, avatar_data, context_data)
+            
+            # Adiciona objeções extras universais
+            extra_objections = [
+                "É muito caro para mim agora",
+                "Preciso consultar meu sócio/esposa",
+                "Vou pensar e te respondo depois",
+                "Não é o momento certo",
+                "Já tentei coisas similares antes"
+            ]
+            
+            for extra_obj in extra_objections:
+                if extra_obj not in objections_list:
+                    objections_list.append(extra_obj)
+            
+            # Regenera com lista expandida
+            return self.generate_complete_anti_objection_system(objections_list, avatar_data, context_data)
+            
+        except Exception as e:
+            logger.error(f"❌ Erro ao gerar sistema abrangente: {e}")
+            return self._generate_fallback_anti_objection_system(context_data)
+    
     def generate_complete_anti_objection_system(
         self, 
         objections_list: List[str], 

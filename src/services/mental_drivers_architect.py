@@ -68,6 +68,24 @@ class MentalDriversArchitect:
             'comando_acao': 'Agora que você {compreensao_adquirida}, a única ação lógica é {acao_especifica} porque {consequencia_inevitavel}.'
         }
     
+    def generate_custom_drivers(
+        self, 
+        avatar_data: Dict[str, Any], 
+        context_data: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
+        """Gera drivers mentais customizados específicos"""
+        
+        logger.info("🧠 Gerando drivers mentais customizados específicos...")
+        
+        try:
+            # Usa o sistema completo para gerar drivers customizados
+            complete_system = self.generate_complete_drivers_system(avatar_data, context_data)
+            return complete_system.get('drivers_customizados', [])
+            
+        except Exception as e:
+            logger.error(f"❌ Erro ao gerar drivers customizados: {e}")
+            return self._create_basic_drivers(context_data)
+    
     def generate_complete_drivers_system(
         self, 
         avatar_data: Dict[str, Any], 

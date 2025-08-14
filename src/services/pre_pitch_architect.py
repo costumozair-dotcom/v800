@@ -159,6 +159,39 @@ class PrePitchArchitect:
             ]
         }
 
+    def generate_advanced_pre_pitch(
+        self, 
+        avatar_data: Dict[str, Any], 
+        oferta_data: Dict[str, Any],
+        drivers_mentais: Dict[str, Any],
+        session_id: str = None
+    ) -> Dict[str, Any]:
+        """Gera pré-pitch avançado e otimizado"""
+        
+        logger.info("🎯 Gerando pré-pitch avançado...")
+        
+        try:
+            # Usa o sistema completo
+            base_pre_pitch = self.construir_pre_pitch_invisivel(avatar_data, oferta_data, drivers_mentais, session_id)
+            
+            # Adiciona elementos avançados
+            advanced_elements = {
+                'sequencias_neurociencia': self._criar_sequencias_neurociencia(avatar_data),
+                'triggers_subconscientes': self._criar_triggers_subconscientes(drivers_mentais),
+                'automation_scripts': self._criar_scripts_automacao(base_pre_pitch),
+                'personalization_matrix': self._criar_matriz_personalizacao(avatar_data),
+                'conversion_boosters': self._criar_boosters_conversao(oferta_data)
+            }
+            
+            # Integra elementos avançados
+            base_pre_pitch.update(advanced_elements)
+            
+            return base_pre_pitch
+            
+        except Exception as e:
+            logger.error(f"❌ Erro ao gerar pré-pitch avançado: {e}")
+            return self._pre_pitch_fallback(avatar_data)
+    
     def construir_pre_pitch_invisivel(self, avatar_data: Dict[str, Any], 
                                     oferta_data: Dict[str, Any],
                                     drivers_mentais: Dict[str, Any],
@@ -464,6 +497,59 @@ class PrePitchArchitect:
                 'Padrões de resposta condicionados'
             ]
         }
+
+    def _criar_sequencias_neurociencia(self, avatar_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Cria sequências baseadas em neurociência"""
+        return {
+            'dopamine_loops': ['Curiosidade -> Revelação -> Satisfação -> Nova Curiosidade'],
+            'mirror_neurons': ['Histórias de transformação pessoal'],
+            'cognitive_ease': ['Simplicidade progressiva de conceitos'],
+            'loss_aversion': ['Enfase no que pode ser perdido']
+        }
+    
+    def _criar_triggers_subconscientes(self, drivers_mentais: Dict[str, Any]) -> List[str]:
+        """Cria triggers subconscientes"""
+        return [
+            'Padrões de repetição específicos',
+            'Ancoragens temporais estratégicas',
+            'Comandos embutidos sutis',
+            'Pressuposições linguísticas'
+        ]
+    
+    def _criar_scripts_automacao(self, base_pre_pitch: Dict[str, Any]) -> Dict[str, Any]:
+        """Cria scripts de automação"""
+        return {
+            'email_sequences': ['Sequência 7 dias', 'Sequência 14 dias', 'Sequência 21 dias'],
+            'social_media_posts': ['Posts educativos', 'Posts de autoridade', 'Posts de prova social'],
+            'content_calendar': ['Cronograma otimizado de conteúdo']
+        }
+    
+    def _criar_matriz_personalizacao(self, avatar_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Cria matriz de personalização"""
+        return {
+            'personality_type': avatar_data.get('perfil_psicografico', {}).get('personalidade', ''),
+            'communication_style': 'Adaptado ao perfil',
+            'emotional_triggers': avatar_data.get('dores_viscerais', [])[:3],
+            'motivational_drivers': avatar_data.get('desejos_secretos', [])[:3]
+        }
+    
+    def _criar_boosters_conversao(self, oferta_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Cria boosters de conversão"""
+        return {
+            'urgency_escalation': ['Suave -> Moderada -> Intensa'],
+            'value_stacking': ['Benefício principal + Bônus + Garantias'],
+            'risk_reversal': ['Garantias progressivamente mais fortes'],
+            'social_proof_sequence': ['Números -> Casos -> Autoridades']
+        }
+    
+    def _pre_pitch_fallback(self, avatar_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Fallback para pré-pitch"""
+        return {
+            'sequencia_basica': ['Consciência -> Interesse -> Desejo -> Ação'],
+            'timeline': '14 dias',
+            'elementos_minimos': ['Educação', 'Autoridade', 'Prova Social', 'Urgência']
+        }
+
 
     def _calcular_metricas_esperadas(self, sequencias: Dict) -> Dict[str, Any]:
         """Calcula métricas esperadas do pré-pitch"""

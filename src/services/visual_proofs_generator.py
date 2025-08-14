@@ -70,6 +70,42 @@ class VisualProofsGenerator:
             'dados': ['Números', 'Percentuais', 'Valores', 'Métricas']
         }
     
+    def generate_comprehensive_proofs(
+        self, 
+        concepts_to_prove: List[str], 
+        avatar_data: Dict[str, Any], 
+        context_data: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
+        """Gera provas visuais abrangentes"""
+        
+        logger.info("🎭 Gerando provas visuais abrangentes...")
+        
+        try:
+            # Usa o sistema completo para gerar provas abrangentes
+            complete_proofs = self.generate_complete_proofs_system(concepts_to_prove, avatar_data, context_data)
+            
+            # Adiciona provas extras para tornar mais abrangente
+            extra_concepts = [
+                "Eficácia comprovada da metodologia",
+                "Superioridade vs concorrentes",
+                "Resultados mensuráveis",
+                "Validação social forte"
+            ]
+            
+            for concept in extra_concepts:
+                if concept not in concepts_to_prove:
+                    extra_proof = self._generate_visual_proof_for_concept(
+                        concept, avatar_data, context_data, len(complete_proofs) + 1
+                    )
+                    if extra_proof:
+                        complete_proofs.append(extra_proof)
+            
+            return complete_proofs
+            
+        except Exception as e:
+            logger.error(f"❌ Erro ao gerar provas abrangentes: {e}")
+            return self._get_default_visual_proofs(context_data)
+    
     def generate_complete_proofs_system(
         self, 
         concepts_to_prove: List[str], 

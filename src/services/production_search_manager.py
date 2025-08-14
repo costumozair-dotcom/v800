@@ -1,20 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-ARQV30 Enhanced v2.0 - Production Search Manager
-Gerenciador de busca para produção com múltiplos provedores e fallbacks
+ARQV30 Enhanced v2.0 - Production Search Manager ULTRA-ROBUSTO
+Gerenciador de busca para produção com rotação de APIs e fallbacks inteligentes
 """
 
 import os
 import logging
 import time
 import requests
-from typing import Dict, List, Optional, Any
 from urllib.parse import quote_plus
 from bs4 import BeautifulSoup
-import json
-import random
+from typing import List, Dict, Any, Optional
 from services.exa_client import exa_client
+from services.google_api_rotation import GoogleAPIRotation
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +21,7 @@ class ProductionSearchManager:
     """Gerenciador de busca para produção com sistema de fallback"""
 
     def __init__(self):
-        """Inicializa o gerenciador de busca"""
+        """Inicializa o gerenciador de busca com rotação de APIs"""
         self.providers = {
             'exa': {
                 'enabled': exa_client.is_available(),
@@ -70,8 +69,19 @@ class ProductionSearchManager:
         self.cache = {}
         self.cache_ttl = 3600  # 1 hora
 
+        # Sistema de rotação para Google Search
+        self.google_api_rotation = GoogleAPIRotation()
+
+        # Rate limiting por provedor
+        self.rate_limits = {
+            'google': {'last_request': 0, 'delay': 1.0, 'requests_count': 0, 'daily_limit': 100},
+            'exa': {'last_request': 0, 'delay': 0.5, 'requests_count': 0, 'daily_limit': 1000},
+            'duckduckgo': {'last_request': 0, 'delay': 2.0, 'requests_count': 0, 'daily_limit': 500},
+            'fallback': {'last_request': 0, 'delay': 0.1, 'requests_count': 0, 'daily_limit': 10000}
+        }
+
         enabled_count = sum(1 for p in self.providers.values() if p['enabled'])
-        logger.info(f"Production Search Manager inicializado com {enabled_count} provedores")
+        logger.info(f"Production Search Manager inicializado com {enabled_count} provedores e rotação de APIs")
 
     def search_with_fallback(self, query: str, max_results: int = 10) -> List[Dict[str, Any]]:
         """Realiza busca com sistema de fallback automático"""
@@ -149,12 +159,21 @@ class ProductionSearchManager:
                 logger.warning(f"⚠️ Provedor {provider_name} desabilitado temporariamente")
 
     def _search_google(self, query: str, max_results: int) -> List[Dict[str, Any]]:
-        """Busca usando Google Custom Search API"""
+        """Busca usando Google Custom Search API com rotação"""
         provider = self.providers['google']
 
+        # Verifica e aplica rate limit
+        if not self._can_make_request('google'):
+            logger.warning("⚠️ Google Search API: Limite de requisição atingido, pulando.")
+            return []
+        self._update_request_time('google')
+
+        # Obtém a próxima chave de API e CSE ID
+        api_key, cse_id = self.google_api_rotation.get_next_api_keys()
+
         params = {
-            'key': provider['api_key'],
-            'cx': provider['cse_id'],
+            'key': api_key,
+            'cx': cse_id,
             'q': query,
             'num': min(max_results, 10),
             'lr': 'lang_pt',
@@ -181,13 +200,22 @@ class ProductionSearchManager:
                     'source': 'google'
                 })
 
+            # Atualiza o tempo da última requisição bem-sucedida para Google
+            self._update_successful_request_time('google')
             return results
         else:
-            raise Exception(f"Google API retornou status {response.status_code}")
+            self._record_provider_error('google') # Registra erro se falhar
+            raise Exception(f"Google API retornou status {response.status_code} com chave {api_key}")
 
     def _search_serper(self, query: str, max_results: int) -> List[Dict[str, Any]]:
         """Busca usando Serper API"""
         provider = self.providers['serper']
+
+        # Verifica e aplica rate limit
+        if not self._can_make_request('serper'):
+            logger.warning("⚠️ Serper API: Limite de requisição atingido, pulando.")
+            return []
+        self._update_request_time('serper')
 
         headers = {
             **self.headers,
@@ -221,12 +249,21 @@ class ProductionSearchManager:
                     'source': 'serper'
                 })
 
+            # Atualiza o tempo da última requisição bem-sucedida para Serper
+            self._update_successful_request_time('serper')
             return results
         else:
+            self._record_provider_error('serper') # Registra erro se falhar
             raise Exception(f"Serper API retornou status {response.status_code}")
 
     def _search_bing(self, query: str, max_results: int) -> List[Dict[str, Any]]:
         """Busca usando Bing (scraping)"""
+        # Verifica e aplica rate limit
+        if not self._can_make_request('bing'):
+            logger.warning("⚠️ Bing Scraping: Limite de requisição atingido, pulando.")
+            return []
+        self._update_request_time('bing')
+
         search_url = f"{self.providers['bing']['base_url']}?q={quote_plus(query)}&cc=br&setlang=pt-br&count={max_results}"
 
         response = requests.get(search_url, headers=self.headers, timeout=15)
@@ -256,8 +293,11 @@ class ProductionSearchManager:
                                 'source': 'bing'
                             })
 
+            # Atualiza o tempo da última requisição bem-sucedida para Bing
+            self._update_successful_request_time('bing')
             return results
         else:
+            self._record_provider_error('bing') # Registra erro se falhar
             raise Exception(f"Bing retornou status {response.status_code}")
 
     # MÉTODO _search_duckduckgo REMOVIDO CONFORME PLANO DE OTIMIZAÇÃO
@@ -303,8 +343,6 @@ class ProductionSearchManager:
             return False
 
         try:
-            if provider_name == 'exa':
-                return self._search_exa(query, max_results)
             test_query = "teste mercado digital Brasil"
 
             if provider_name == 'google':
@@ -313,6 +351,8 @@ class ProductionSearchManager:
                 results = self._search_serper(test_query, 3)
             elif provider_name == 'bing':
                 results = self._search_bing(test_query, 3)
+            elif provider_name == 'exa':
+                results = self._search_exa(test_query, 3)
             else:
                 return False
 
@@ -324,6 +364,12 @@ class ProductionSearchManager:
 
     def _search_exa(self, query: str, max_results: int) -> List[Dict[str, Any]]:
         """Busca usando Exa Neural Search"""
+        # Verifica e aplica rate limit
+        if not self._can_make_request('exa'):
+            logger.warning("⚠️ Exa Search: Limite de requisição atingido, pulando.")
+            return []
+        self._update_request_time('exa')
+
         try:
             # Melhora query para mercado brasileiro
             enhanced_query = self._enhance_query_for_brazil(query)
@@ -358,12 +404,14 @@ class ProductionSearchManager:
                     'exa_id': item.get('id', '')
                 })
 
-            logger.info(f"✅ Exa Neural Search: {len(results)} resultados")
+            # Atualiza o tempo da última requisição bem-sucedida para Exa
+            self._update_successful_request_time('exa')
             return results
 
         except Exception as e:
             if "quota" in str(e).lower() or "limit" in str(e).lower():
                 logger.warning(f"⚠️ Exa atingiu limite: {str(e)}")
+            self._record_provider_error('exa') # Registra erro se falhar
             raise e
 
     def _enhance_query_for_brazil(self, query: str) -> str:
@@ -380,6 +428,63 @@ class ProductionSearchManager:
             enhanced_query += " 2024"
 
         return enhanced_query.strip()
+
+    # Métodos auxiliares para Rate Limiting e Rotação de APIs
+    def _can_make_request(self, provider_name: str) -> bool:
+        """Verifica se é possível fazer uma requisição para o provedor"""
+        if provider_name not in self.rate_limits:
+            return True
+
+        current_time = time.time()
+        provider_limits = self.rate_limits[provider_name]
+
+        # Verifica se o limite diário foi atingido
+        # (Uma implementação mais robusta precisaria persistir o contador diário)
+        # Para este exemplo, vamos assumir que o contador é resetado ao reiniciar o script
+        if provider_limits['requests_count'] >= provider_limits['daily_limit']:
+            logger.warning(f"⚠️ Limite diário de requisições para {provider_name} atingido.")
+            return False
+
+        # Verifica o delay entre requisições
+        if current_time - provider_limits['last_request'] < provider_limits['delay']:
+            return False
+
+        return True
+
+    def _update_request_time(self, provider_name: str):
+        """Atualiza o tempo da última requisição para o provedor"""
+        if provider_name in self.rate_limits:
+            self.rate_limits[provider_name]['last_request'] = time.time()
+            self.rate_limits[provider_name]['requests_count'] += 1
+
+    def _update_successful_request_time(self, provider_name: str):
+        """Atualiza o tempo da última requisição bem-sucedida, resetando contador se necessário"""
+        if provider_name in self.rate_limits:
+            # Se a requisição foi bem-sucedida, podemos considerar resetar o contador de erros,
+            # mas para rate limiting, apenas atualizamos o tempo e a contagem.
+            # O 'delay' pode ser ajustado dinamicamente com base no sucesso.
+            pass # A lógica de ajuste dinâmico de delay não está implementada aqui.
+
+    # Classe fictícia para representar a rotação de APIs do Google Search
+    # Em um cenário real, esta classe gerenciaria múltiplas chaves e IDs
+    class GoogleAPIRotation:
+        def __init__(self):
+            self.keys = [
+                (os.getenv('GOOGLE_SEARCH_KEY'), os.getenv('GOOGLE_CSE_ID'))
+                # Adicione mais pares de chave/CSE ID aqui se disponíveis
+            ]
+            self.current_index = 0
+            self.valid_keys = [(k, c) for k, c in self.keys if k and c]
+            if not self.valid_keys:
+                logger.error("Nenhuma chave de API do Google Search válida encontrada.")
+
+        def get_next_api_keys(self) -> tuple[Optional[str], Optional[str]]:
+            if not self.valid_keys:
+                return None, None
+
+            key_pair = self.valid_keys[self.current_index]
+            self.current_index = (self.current_index + 1) % len(self.valid_keys)
+            return key_pair
 
 # Instância global
 production_search_manager = ProductionSearchManager()

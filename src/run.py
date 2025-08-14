@@ -39,7 +39,7 @@ def create_app():
     from services.environment_loader import environment_loader
 
     app = Flask(__name__)
-    
+
     # CONFIGURAÇÃO CRÍTICA DE PRODUÇÃO
     # Força ambiente de produção - NUNCA debug em produção
     FLASK_ENV = os.getenv('FLASK_ENV', 'production')
@@ -81,7 +81,9 @@ def create_app():
     from routes.progress import progress_bp
     from routes.user import user_bp
     from routes.files import files_bp
-    from routes.pdf_generator import pdf_bp
+    from routes.pdf_generator import pdf_generator_bp
+    from routes.html_report_generator import html_report_bp
+    from routes.pitch_system import pitch_system_bp
     from routes.monitoring import monitoring_bp
     from routes.forensic_analysis import forensic_bp
 
@@ -90,7 +92,9 @@ def create_app():
     app.register_blueprint(progress_bp, url_prefix='/api')
     app.register_blueprint(user_bp, url_prefix='/api')
     app.register_blueprint(files_bp, url_prefix='/api')
-    app.register_blueprint(pdf_bp, url_prefix='/api')
+    app.register_blueprint(pdf_generator_bp, url_prefix='/api')
+    app.register_blueprint(html_report_bp, url_prefix='/api')
+    app.register_blueprint(pitch_system_bp, url_prefix='/api')
     app.register_blueprint(monitoring_bp, url_prefix='/api')
     app.register_blueprint(forensic_bp, url_prefix='/api/forensic')
 

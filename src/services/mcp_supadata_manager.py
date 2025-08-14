@@ -24,27 +24,27 @@ class MCPSupadataManager:
         # URLs e configurações
         self.base_url = os.getenv('SUPADATA_API_URL', 'https://api.supadata.ai/v1')
         self.api_key = os.getenv('SUPADATA_API_KEY')
-        
+
         # Headers padronizados
         self.headers = {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
             'User-Agent': 'ARQV30-Enhanced/2.1'
         }
-        
+
         # Adiciona autorização apenas se a chave estiver disponível
         if self.api_key:
             self.headers['Authorization'] = f'Bearer {self.api_key}'
-        
+
         # Status de disponibilidade
         self.is_available = bool(self.api_key)
         self.last_health_check = None
         self.service_status = "unknown"
-        
+
         # Configurações de timeout e retry
         self.request_timeout = 30
         self.max_retries = 2
-        
+
         if self.is_available:
             logger.info("✅ MCP Supadata Manager ATIVO - pesquisas em redes sociais habilitadas")
             self._perform_health_check()
@@ -56,28 +56,28 @@ class MCPSupadataManager:
         try:
             health_endpoint = f"{self.base_url}/health"
             response = requests.get(
-                health_endpoint, 
-                headers=self.headers, 
+                health_endpoint,
+                headers=self.headers,
                 timeout=10
             )
-            
+
             if response.status_code == 200:
                 self.service_status = "healthy"
                 logger.info("✅ Supadata API health check: OK")
             else:
                 self.service_status = "degraded"
                 logger.warning(f"⚠️ Supadata API health check: {response.status_code}")
-                
+
         except Exception as e:
             self.service_status = "unhealthy"
             logger.error(f"❌ Supadata API health check failed: {e}")
-            
+
         self.last_health_check = datetime.now()
 
     def _make_request(self, method: str, endpoint: str, **kwargs) -> Optional[requests.Response]:
         """Método centralizado para fazer requisições com retry e tratamento de erros"""
         full_url = f"{self.base_url}/{endpoint.lstrip('/')}"
-        
+
         for attempt in range(self.max_retries + 1):
             try:
                 response = requests.request(
@@ -87,24 +87,24 @@ class MCPSupadataManager:
                     timeout=self.request_timeout,
                     **kwargs
                 )
-                
+
                 # Log detalhado para debug
                 logger.debug(f"API Request: {method} {full_url} - Status: {response.status_code}")
-                
+
                 if response.status_code == 429:  # Rate limit
                     if attempt < self.max_retries:
                         wait_time = (2 ** attempt) + random.uniform(0, 1)
                         logger.warning(f"Rate limit hit, waiting {wait_time:.1f}s before retry {attempt + 1}")
                         time.sleep(wait_time)
                         continue
-                
+
                 return response
-                
+
             except requests.exceptions.RequestException as e:
                 logger.error(f"Request error (attempt {attempt + 1}): {e}")
                 if attempt == self.max_retries:
                     return None
-                    
+
         return None
 
     def search_youtube(self, query: str, max_results: int = 10) -> Dict[str, Any]:
@@ -126,19 +126,19 @@ class MCPSupadataManager:
             }
 
             response = self._make_request('GET', '/search/youtube', params=params)
-            
+
             if not response:
                 logger.warning("⚠️ YouTube API: Falha na comunicação - usando análise básica")
                 return self._create_youtube_basic_analysis(query, max_results)
-            
+
             if response.status_code == 401:
                 logger.warning("🔑 YouTube API: Falha na autenticação - usando análise básica")
                 return self._create_youtube_basic_analysis(query, max_results)
-            
+
             if response.status_code == 403:
                 logger.warning("🚫 YouTube API: Acesso negado - usando análise básica")
                 return self._create_youtube_basic_analysis(query, max_results)
-                
+
             if response.status_code == 200:
                 try:
                     data = response.json()
@@ -159,7 +159,7 @@ class MCPSupadataManager:
     def _create_youtube_basic_analysis(self, query: str, max_results: int) -> Dict[str, Any]:
         """Cria análise básica do YouTube com dados mais realistas"""
         keywords = query.lower().split()
-        
+
         # Dados mais específicos baseados na query
         results = []
         topics = [
@@ -169,7 +169,7 @@ class MCPSupadataManager:
             f"Tendências de {' '.join(keywords) if keywords else 'mercado'} em 2024",
             f"Cases de sucesso com {keywords[0] if keywords else 'inovação'}"
         ]
-        
+
         for i, topic in enumerate(topics[:max_results]):
             result = {
                 'title': topic,
@@ -200,13 +200,13 @@ class MCPSupadataManager:
     def _process_youtube_results(self, data: Dict[str, Any], query: str) -> Dict[str, Any]:
         """Processa resultados reais da API do YouTube"""
         processed_results = []
-        
+
         items = data.get('items', data.get('data', []))
-        
+
         for item in items:
             snippet = item.get('snippet', {})
             statistics = item.get('statistics', {})
-            
+
             result = {
                 'title': snippet.get('title', 'Título não disponível'),
                 'description': snippet.get('description', '')[:200] + '...' if len(snippet.get('description', '')) > 200 else snippet.get('description', ''),
@@ -248,7 +248,7 @@ class MCPSupadataManager:
             }
 
             response = self._make_request('POST', '/twitter/search', json=payload)
-            
+
             if not response or response.status_code != 200:
                 logger.warning(f"⚠️ Twitter API: Status {response.status_code if response else 'timeout'}")
                 return self._create_simulated_twitter_data(query, max_results)
@@ -269,7 +269,7 @@ class MCPSupadataManager:
     def _process_twitter_results(self, data: Dict[str, Any], query: str) -> Dict[str, Any]:
         """Processa resultados reais do Twitter"""
         processed_results = []
-        
+
         for item in data.get('data', []):
             metrics = item.get('public_metrics', {})
             result = {
@@ -317,7 +317,7 @@ class MCPSupadataManager:
             }
 
             response = self._make_request('POST', '/linkedin/search', json=payload)
-            
+
             if not response or response.status_code != 200:
                 logger.warning(f"⚠️ LinkedIn API: Status {response.status_code if response else 'timeout'}")
                 return self._create_simulated_linkedin_data(query, max_results)
@@ -338,11 +338,11 @@ class MCPSupadataManager:
     def _process_linkedin_results(self, data: Dict[str, Any], query: str) -> Dict[str, Any]:
         """Processa resultados reais do LinkedIn"""
         processed_results = []
-        
+
         for item in data.get('elements', []):
             social_counts = item.get('socialCounts', {})
             author_info = item.get('author', {})
-            
+
             result = {
                 'title': item.get('title', 'Post do LinkedIn'),
                 'content': item.get('content', '')[:300] + '...' if len(item.get('content', '')) > 300 else item.get('content', ''),
@@ -375,7 +375,7 @@ class MCPSupadataManager:
     def search_instagram(self, query: str, max_results: int = 10) -> Dict[str, Any]:
         """Busca no Instagram com tratamento claro de indisponibilidade"""
         logger.info(f"📸 Instagram: API não disponível para '{query}'")
-        
+
         return {
             "success": False,
             "platform": "instagram",
@@ -390,9 +390,9 @@ class MCPSupadataManager:
 
     def search_all_platforms(self, query: str, max_results_per_platform: int = 5) -> Dict[str, Any]:
         """Busca unificada em todas as plataformas com melhor logging"""
-        
+
         logger.info(f"🔍 Iniciando busca unificada para: '{query}'")
-        
+
         results = {
             "query": query,
             "timestamp": datetime.now().isoformat(),
@@ -408,7 +408,7 @@ class MCPSupadataManager:
             youtube_results = self.search_youtube(query, max_results_per_platform)
             results["platforms"]["youtube"] = youtube_results
             results["platforms_searched"].append("youtube")
-            
+
             if youtube_results.get("success"):
                 results["platforms_successful"].append("youtube")
                 results["total_results"] += len(youtube_results.get("results", []))
@@ -420,7 +420,7 @@ class MCPSupadataManager:
             twitter_results = self.search_twitter(query, max_results_per_platform)
             results["platforms"]["twitter"] = twitter_results
             results["platforms_searched"].append("twitter")
-            
+
             if twitter_results.get("success"):
                 results["platforms_successful"].append("twitter")
                 results["total_results"] += len(twitter_results.get("results", []))
@@ -432,7 +432,7 @@ class MCPSupadataManager:
             linkedin_results = self.search_linkedin(query, max_results_per_platform)
             results["platforms"]["linkedin"] = linkedin_results
             results["platforms_searched"].append("linkedin")
-            
+
             if linkedin_results.get("success"):
                 results["platforms_successful"].append("linkedin")
                 results["total_results"] += len(linkedin_results.get("results", []))
@@ -444,7 +444,7 @@ class MCPSupadataManager:
             instagram_results = self.search_instagram(query, max_results_per_platform)
             results["platforms"]["instagram"] = instagram_results
             results["platforms_searched"].append("instagram")
-            
+
             if instagram_results.get("success"):
                 results["platforms_successful"].append("instagram")
                 results["total_results"] += len(instagram_results.get("results", []))
@@ -453,18 +453,18 @@ class MCPSupadataManager:
 
         # Resultado final
         results["success"] = len(results["platforms_successful"]) > 0
-        
+
         logger.info(f"🎯 Busca unificada concluída: {results['total_results']} posts de {len(results['platforms_successful'])}/{len(results['platforms_searched'])} plataformas")
 
         return results
 
     def analyze_sentiment(self, posts: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Análise de sentimento aprimorada com mais nuances"""
-        
+
         if not posts:
             return {
-                "sentiment": "neutral", 
-                "score": 0.0, 
+                "sentiment": "neutral",
+                "score": 0.0,
                 "analysis_quality": "no_data",
                 "message": "Nenhum post fornecido para análise"
             }
@@ -500,18 +500,18 @@ class MCPSupadataManager:
         for i, post in enumerate(posts):
             # Extrai texto do post
             text_content = self._extract_text_from_post(post)
-            
+
             if not text_content:
                 analysis_results['neutral'] += 1
                 continue
-                
+
             text_lower = text_content.lower()
-            
+
             # Contagem de palavras por sentimento
             pos_count = sum(1 for word in sentiment_keywords['positive'] if word in text_lower)
             neg_count = sum(1 for word in sentiment_keywords['negative'] if word in text_lower)
             neu_count = sum(1 for word in sentiment_keywords['neutral'] if word in text_lower)
-            
+
             # Determina sentimento predominante
             if pos_count > neg_count and pos_count > neu_count:
                 sentiment = 'positive'
@@ -541,12 +541,12 @@ class MCPSupadataManager:
         total = analysis_results['total']
         pos_ratio = analysis_results['positive'] / total
         neg_ratio = analysis_results['negative'] / total
-        
+
         if pos_ratio > neg_ratio and pos_ratio > 0.4:
             overall_sentiment = 'positive'
             overall_score = pos_ratio * 100
         elif neg_ratio > pos_ratio and neg_ratio > 0.4:
-            overall_sentiment = 'negative' 
+            overall_sentiment = 'negative'
             overall_score = neg_ratio * -100
         else:
             overall_sentiment = 'neutral'
@@ -554,7 +554,7 @@ class MCPSupadataManager:
 
         # Calcula confiança geral
         confidence = abs(pos_ratio - neg_ratio) * 2  # Diferença normalizada
-        
+
         return {
             'sentiment': overall_sentiment,
             'score': round(overall_score, 2),
@@ -577,11 +577,11 @@ class MCPSupadataManager:
     def _extract_text_from_post(self, post: Dict[str, Any]) -> str:
         """Extrai texto de diferentes tipos de posts"""
         text_fields = ['text', 'content', 'caption', 'title', 'description']
-        
+
         for field in text_fields:
             if field in post and post[field]:
                 return str(post[field])
-                
+
         return ""
     # Métodos para dados simulados quando API não disponível
     def _create_simulated_youtube_data(self, query: str, max_results: int) -> Dict[str, Any]:

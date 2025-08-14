@@ -15,14 +15,14 @@ logger = logging.getLogger(__name__)
 
 class FuturePredictionEngine:
     """Motor de Predição do Futuro - Análise Preditiva Ultra-Avançada"""
-    
+
     def __init__(self):
         """Inicializa o motor de predição"""
         self.prediction_models = self._load_prediction_models()
         self.market_indicators = self._load_market_indicators()
         self.trend_patterns = self._load_trend_patterns()
         logger.info("Future Prediction Engine inicializado")
-    
+
     def _load_prediction_models(self) -> Dict[str, Any]:
         """Carrega modelos de predição"""
         return {
@@ -51,7 +51,7 @@ class FuturePredictionEngine:
                 "horizonte": "6-24 meses"
             }
         }
-    
+
     def _load_market_indicators(self) -> Dict[str, Any]:
         """Carrega indicadores de mercado"""
         return {
@@ -74,7 +74,7 @@ class FuturePredictionEngine:
                 "escolaridade_superior": {"atual": 21.4, "projecao_2024": 23.7, "projecao_2025": 26.1}
             }
         }
-    
+
     def _load_trend_patterns(self) -> Dict[str, Any]:
         """Carrega padrões de tendências"""
         return {
@@ -97,40 +97,73 @@ class FuturePredictionEngine:
                 "healthtech": {"fase": "crescimento", "impacto": "transformacional", "timeline": "2024-2029"}
             }
         }
-    
+
+    def generate_market_predictions(
+        self,
+        segmento: str,
+        context_data: Dict[str, Any],
+        horizon_months: int = 36
+    ) -> Dict[str, Any]:
+        """Gera predições específicas do mercado"""
+
+        logger.info(f"🔮 Gerando predições específicas para {segmento}...")
+
+        try:
+            # Usa o sistema completo de predição
+            full_prediction = self.predict_market_future(segmento, context_data, horizon_months)
+
+            # Adiciona predições específicas extras
+            specific_predictions = {
+                'short_term_6_months': self._predict_short_term(segmento, context_data),
+                'medium_term_18_months': self._predict_medium_term(segmento, context_data),
+                'long_term_36_months': self._predict_long_term(segmento, context_data),
+                'disruptive_events': self._predict_disruptive_events(segmento),
+                'opportunity_windows': self._identify_opportunity_windows(segmento),
+                'competitive_landscape': self._predict_competitive_changes(segmento)
+            }
+
+            # Integra predições específicas
+            full_prediction['predicoes_especificas'] = specific_predictions
+
+            return full_prediction
+
+        except Exception as e:
+            logger.error(f"❌ Erro ao gerar predições: {e}")
+            return self._fallback_predictions(segmento)
+
     def predict_market_future(
-        self, 
-        segmento: str, 
+        self,
+        segmento: str,
         context_data: Dict[str, Any],
         horizon_months: int = 36
     ) -> Dict[str, Any]:
         """Prediz o futuro do mercado com precisão ultra-alta"""
-        
+
         logger.info(f"🔮 Predizendo futuro do mercado {segmento} para {horizon_months} meses")
-        
+
         # Análise de tendências atuais
         current_trends = self._analyze_current_trends(segmento, context_data)
-        
+
         # Projeções quantitativas
         quantitative_projections = self._generate_quantitative_projections(segmento, horizon_months)
-        
+
         # Cenários futuros
         future_scenarios = self._generate_future_scenarios(segmento, horizon_months)
-        
+
         # Oportunidades emergentes
         emerging_opportunities = self._identify_emerging_opportunities(segmento, current_trends)
-        
+
         # Ameaças potenciais
         potential_threats = self._identify_potential_threats(segmento, current_trends)
-        
+
         # Pontos de inflexão
         inflection_points = self._identify_inflection_points(segmento, horizon_months)
-        
+
         # Recomendações estratégicas
         strategic_recommendations = self._generate_strategic_recommendations(
             segmento, future_scenarios, emerging_opportunities, potential_threats
         )
-        
+
         return {
             "tendencias_atuais": current_trends,
             "projecoes_quantitativas": quantitative_projections,
@@ -143,10 +176,10 @@ class FuturePredictionEngine:
             "metricas_monitoramento": self._create_monitoring_metrics(segmento),
             "plano_contingencia": self._create_contingency_plan(potential_threats)
         }
-    
+
     def _analyze_current_trends(self, segmento: str, context_data: Dict[str, Any]) -> Dict[str, Any]:
         """Analisa tendências atuais do mercado"""
-        
+
         # Mapeia segmento para tendências relevantes
         segment_trends = {
             "produtos digitais": ["ia_generativa", "automacao", "personalizacao", "economia_criador"],
@@ -157,18 +190,18 @@ class FuturePredictionEngine:
             "saude": ["healthtech", "ia_generativa", "experiencia_digital", "sustentabilidade"],
             "fintech": ["fintech", "ia_generativa", "experiencia_digital", "blockchain"]
         }
-        
+
         segmento_lower = segmento.lower()
         relevant_trends = []
-        
+
         for segment, trends in segment_trends.items():
             if segment in segmento_lower:
                 relevant_trends = trends
                 break
-        
+
         if not relevant_trends:
             relevant_trends = ["ia_generativa", "automacao", "personalizacao", "experiencia_digital"]
-        
+
         # Analisa cada tendência relevante
         trend_analysis = {}
         for trend in relevant_trends:
@@ -186,17 +219,17 @@ class FuturePredictionEngine:
                         "ameacas": self._extract_trend_threats(trend, segmento)
                     }
                     break
-        
+
         return {
             "tendencias_relevantes": trend_analysis,
             "momentum_geral": self._calculate_market_momentum(trend_analysis),
             "velocidade_mudanca": self._calculate_change_velocity(trend_analysis),
             "janela_oportunidade": self._calculate_opportunity_window(trend_analysis)
         }
-    
+
     def _generate_quantitative_projections(self, segmento: str, horizon_months: int) -> Dict[str, Any]:
         """Gera projeções quantitativas precisas"""
-        
+
         # Dados base por segmento (baseado em pesquisas reais)
         segment_data = {
             "produtos digitais": {
@@ -218,7 +251,7 @@ class FuturePredictionEngine:
                 "ticket_medio": 2500
             }
         }
-        
+
         # Seleciona dados do segmento ou usa padrão
         segmento_lower = segmento.lower()
         data = None
@@ -226,21 +259,21 @@ class FuturePredictionEngine:
             if seg in segmento_lower:
                 data = seg_data
                 break
-        
+
         if not data:
             data = segment_data["produtos digitais"]  # Default
-        
+
         # Calcula projeções
         months = horizon_months
         growth_rate = data["crescimento_anual"]
         current_size = data["market_size_atual"]
-        
+
         projections = {}
         for month in [6, 12, 18, 24, 36]:
             if month <= months:
                 growth_factor = (1 + growth_rate) ** (month / 12)
                 projected_size = current_size * growth_factor
-                
+
                 projections[f"mes_{month}"] = {
                     "tamanho_mercado": projected_size,
                     "crescimento_acumulado": (growth_factor - 1) * 100,
@@ -248,7 +281,7 @@ class FuturePredictionEngine:
                     "receita_potencial": projected_size * 0.001,  # 0.1% de captura
                     "confianca_projecao": max(0.95 - (month / 60), 0.70)  # Diminui com tempo
                 }
-        
+
         return {
             "projecoes_temporais": projections,
             "crescimento_composto": {
@@ -271,10 +304,10 @@ class FuturePredictionEngine:
                 }
             }
         }
-    
+
     def _generate_future_scenarios(self, segmento: str, horizon_months: int) -> Dict[str, Any]:
         """Gera cenários futuros detalhados"""
-        
+
         scenarios = {
             "cenario_base": {
                 "nome": "Evolução Natural",
@@ -299,7 +332,7 @@ class FuturePredictionEngine:
                     "Mudanças regulatórias"
                 ]
             },
-            
+
             "cenario_aceleracao": {
                 "nome": "Transformação Acelerada",
                 "probabilidade": 0.25,
@@ -323,7 +356,7 @@ class FuturePredictionEngine:
                     "Disrupção por players externos"
                 ]
             },
-            
+
             "cenario_disrupcao": {
                 "nome": "Disrupção Completa",
                 "probabilidade": 0.15,
@@ -348,24 +381,24 @@ class FuturePredictionEngine:
                 ]
             }
         }
-        
+
         # Adiciona timeline específica para cada cenário
         for scenario_name, scenario in scenarios.items():
             scenario["timeline"] = self._create_scenario_timeline(scenario, horizon_months)
             scenario["indicadores_antecipacao"] = self._create_early_indicators(scenario, segmento)
             scenario["plano_acao"] = self._create_scenario_action_plan(scenario, segmento)
-        
+
         return scenarios
-    
+
     def _identify_emerging_opportunities(
-        self, 
-        segmento: str, 
+        self,
+        segmento: str,
         current_trends: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
         """Identifica oportunidades emergentes"""
-        
+
         opportunities = []
-        
+
         # Oportunidades baseadas em IA
         if "ia_generativa" in current_trends.get("tendencias_relevantes", {}):
             opportunities.append({
@@ -378,7 +411,7 @@ class FuturePredictionEngine:
                 "barreiras_entrada": ["Conhecimento técnico", "Investimento inicial", "Regulamentação"],
                 "vantagem_competitiva": "Primeiro movimento, eficiência superior, personalização massiva"
             })
-        
+
         # Oportunidades baseadas em automação
         if "automacao" in current_trends.get("tendencias_relevantes", {}):
             opportunities.append({
@@ -391,7 +424,7 @@ class FuturePredictionEngine:
                 "barreiras_entrada": ["Complexidade técnica", "Resistência mudança", "Investimento alto"],
                 "vantagem_competitiva": "Redução de custos, escalabilidade, consistência"
             })
-        
+
         # Oportunidades baseadas em personalização
         opportunities.append({
             "nome": f"Hiper-Personalização {segmento}",
@@ -403,7 +436,7 @@ class FuturePredictionEngine:
             "barreiras_entrada": ["Coleta de dados", "Análise comportamental", "Tecnologia"],
             "vantagem_competitiva": "Relevância superior, fidelização, premium pricing"
         })
-        
+
         # Oportunidades baseadas em economia do criador
         if segmento.lower() in ["produtos digitais", "educacao", "consultoria"]:
             opportunities.append({
@@ -413,27 +446,27 @@ class FuturePredictionEngine:
                 "timeline": "6-18 meses",
                 "investimento_necessario": "R$ 200K - R$ 2M",
                 "roi_esperado": "400-1000%",
-                "barreiras_entrada": ["Network effects", "Investimento plataforma", "Aquisição usuários"],
+                "barreiras_entrada": ["Efeito rede", "Investimento plataforma", "Aquisição usuários"],
                 "vantagem_competitiva": "Efeito rede, monetização múltipla, dados únicos"
             })
-        
+
         # Adiciona análise de viabilidade para cada oportunidade
         for opp in opportunities:
             opp["analise_viabilidade"] = self._analyze_opportunity_viability(opp, segmento)
             opp["roadmap_implementacao"] = self._create_opportunity_roadmap(opp)
             opp["metricas_sucesso"] = self._define_opportunity_metrics(opp)
-        
+
         return opportunities
-    
+
     def _identify_potential_threats(
-        self, 
-        segmento: str, 
+        self,
+        segmento: str,
         current_trends: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
         """Identifica ameaças potenciais"""
-        
+
         threats = []
-        
+
         # Ameaça de disrupção por IA
         threats.append({
             "nome": "Disrupção por IA",
@@ -454,7 +487,7 @@ class FuturePredictionEngine:
                 "Criar parcerias com empresas de tecnologia"
             ]
         })
-        
+
         # Ameaça de commoditização
         threats.append({
             "nome": "Commoditização do Mercado",
@@ -475,7 +508,7 @@ class FuturePredictionEngine:
                 "Desenvolvimento de IP proprietário"
             ]
         })
-        
+
         # Ameaça regulatória
         threats.append({
             "nome": "Mudanças Regulatórias",
@@ -496,7 +529,7 @@ class FuturePredictionEngine:
                 "Diversificação geográfica"
             ]
         })
-        
+
         # Ameaça de entrada de gigantes
         threats.append({
             "nome": "Entrada de Big Techs",
@@ -517,14 +550,14 @@ class FuturePredictionEngine:
                 "Inovar constantemente"
             ]
         })
-        
+
         return threats
-    
+
     def _identify_inflection_points(self, segmento: str, horizon_months: int) -> List[Dict[str, Any]]:
         """Identifica pontos de inflexão críticos"""
-        
+
         inflection_points = []
-        
+
         # Ponto de inflexão tecnológico
         inflection_points.append({
             "nome": "Maturação da IA Generativa",
@@ -540,7 +573,7 @@ class FuturePredictionEngine:
             "janela_acao": "3-6 meses antes do ponto",
             "custo_perder": f"Perda de 40-60% de market share no {segmento}"
         })
-        
+
         # Ponto de inflexão regulatório
         inflection_points.append({
             "nome": "Nova Regulamentação Digital",
@@ -556,7 +589,7 @@ class FuturePredictionEngine:
             "janela_acao": "6-12 meses antes do ponto",
             "custo_perder": "Multas, restrições operacionais, perda de licenças"
         })
-        
+
         # Ponto de inflexão de mercado
         inflection_points.append({
             "nome": "Saturação do Mercado Tradicional",
@@ -572,9 +605,9 @@ class FuturePredictionEngine:
             "janela_acao": "12-18 meses antes do ponto",
             "custo_perder": f"Estagnação de crescimento no {segmento}"
         })
-        
+
         return inflection_points
-    
+
     def _generate_strategic_recommendations(
         self,
         segmento: str,
@@ -583,7 +616,7 @@ class FuturePredictionEngine:
         threats: List[Dict[str, Any]]
     ) -> Dict[str, Any]:
         """Gera recomendações estratégicas baseadas nas predições"""
-        
+
         return {
             "estrategias_imediatas": {
                 "0_6_meses": [
@@ -596,7 +629,7 @@ class FuturePredictionEngine:
                 "investimento": "R$ 50K - R$ 200K",
                 "roi_esperado": "150-300%"
             },
-            
+
             "estrategias_medio_prazo": {
                 "6_18_meses": [
                     f"Lançar produtos/serviços IA-powered no {segmento}",
@@ -608,7 +641,7 @@ class FuturePredictionEngine:
                 "investimento": "R$ 200K - R$ 1M",
                 "roi_esperado": "200-500%"
             },
-            
+
             "estrategias_longo_prazo": {
                 "18_36_meses": [
                     f"Dominar categoria específica no {segmento}",
@@ -620,7 +653,7 @@ class FuturePredictionEngine:
                 "investimento": "R$ 1M - R$ 5M",
                 "roi_esperado": "300-1000%"
             },
-            
+
             "estrategias_contingencia": {
                 "cenario_disrupcao": [
                     f"Pivotar para novo modelo de negócio no {segmento}",
@@ -636,10 +669,10 @@ class FuturePredictionEngine:
                 ]
             }
         }
-    
+
     def _create_implementation_timeline(self, recommendations: Dict[str, Any]) -> Dict[str, Any]:
         """Cria cronograma de implementação detalhado"""
-        
+
         return {
             "fase_1_fundacao": {
                 "duracao": "0-6 meses",
@@ -654,7 +687,7 @@ class FuturePredictionEngine:
                 "investimento_mensal": "R$ 15K - R$ 35K",
                 "kpis": ["Eficiência operacional", "Satisfação da equipe", "Qualidade do output"]
             },
-            
+
             "fase_2_expansao": {
                 "duracao": "6-18 meses",
                 "marcos_principais": [
@@ -667,7 +700,7 @@ class FuturePredictionEngine:
                 "investimento_mensal": "R$ 25K - R$ 80K",
                 "kpis": ["Market share", "Receita recorrente", "NPS", "Churn rate"]
             },
-            
+
             "fase_3_dominancia": {
                 "duracao": "18-36 meses",
                 "marcos_principais": [
@@ -680,10 +713,10 @@ class FuturePredictionEngine:
                 "kpis": ["Dominância de mercado", "Rentabilidade", "Valor da empresa", "Sustentabilidade"]
             }
         }
-    
+
     def _create_monitoring_metrics(self, segmento: str) -> Dict[str, Any]:
         """Cria métricas de monitoramento do futuro"""
-        
+
         return {
             "indicadores_antecipacao": {
                 "tecnologicos": [
@@ -705,14 +738,14 @@ class FuturePredictionEngine:
                     "Fusões e aquisições no setor"
                 ]
             },
-            
+
             "alertas_criticos": {
                 "nivel_1_atencao": "Mudança de 10% nos indicadores",
                 "nivel_2_alerta": "Mudança de 25% nos indicadores",
                 "nivel_3_acao": "Mudança de 50% nos indicadores",
                 "nivel_4_emergencia": "Mudança de 100% nos indicadores"
             },
-            
+
             "frequencia_monitoramento": {
                 "diario": ["Buscas Google", "Redes sociais", "Notícias do setor"],
                 "semanal": ["Indicadores econômicos", "Lançamentos de produtos", "Movimentos concorrência"],
@@ -720,10 +753,10 @@ class FuturePredictionEngine:
                 "trimestral": ["Revisão estratégica completa", "Ajuste de projeções", "Atualização de cenários"]
             }
         }
-    
+
     def _create_contingency_plan(self, threats: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Cria plano de contingência para ameaças"""
-        
+
         return {
             "planos_por_ameaca": {
                 threat["nome"]: {
@@ -734,7 +767,7 @@ class FuturePredictionEngine:
                     "success_metrics": "Minimização de impacto negativo"
                 } for threat in threats
             },
-            
+
             "protocolo_ativacao": {
                 "deteccao": "Sistema de monitoramento identifica ameaça",
                 "avaliacao": "Equipe avalia severidade e probabilidade",
@@ -742,7 +775,7 @@ class FuturePredictionEngine:
                 "execucao": "Implementação imediata das contramedidas",
                 "monitoramento": "Acompanhamento contínuo da eficácia"
             },
-            
+
             "recursos_emergencia": {
                 "financeiro": "10-20% do orçamento anual reservado",
                 "humano": "Equipe de resposta rápida treinada",
@@ -750,10 +783,10 @@ class FuturePredictionEngine:
                 "parcerias": "Rede de fornecedores e consultores"
             }
         }
-    
+
     def _calculate_trend_relevance(self, trend: str, segmento: str) -> float:
         """Calcula relevância da tendência para o segmento"""
-        
+
         relevance_map = {
             "ia_generativa": {
                 "produtos digitais": 0.95,
@@ -770,18 +803,18 @@ class FuturePredictionEngine:
                 "fintech": 0.85
             }
         }
-        
+
         segmento_lower = segmento.lower()
         if trend in relevance_map:
             for seg, relevance in relevance_map[trend].items():
                 if seg in segmento_lower:
                     return relevance
-        
+
         return 0.60  # Relevância padrão
-    
+
     def _extract_trend_opportunities(self, trend: str, segmento: str) -> List[str]:
         """Extrai oportunidades específicas da tendência"""
-        
+
         opportunities_map = {
             "ia_generativa": [
                 f"Automatizar criação de conteúdo para {segmento}",
@@ -796,12 +829,12 @@ class FuturePredictionEngine:
                 f"Implementar otimização automática de processos no {segmento}"
             ]
         }
-        
+
         return opportunities_map.get(trend, [f"Aproveitar {trend} para inovar no {segmento}"])
-    
+
     def _extract_trend_threats(self, trend: str, segmento: str) -> List[str]:
         """Extrai ameaças específicas da tendência"""
-        
+
         threats_map = {
             "ia_generativa": [
                 f"IA pode substituir serviços tradicionais no {segmento}",
@@ -816,80 +849,80 @@ class FuturePredictionEngine:
                 f"Resistência à automação pode causar atraso no {segmento}"
             ]
         }
-        
+
         return threats_map.get(trend, [f"{trend} pode impactar negativamente o {segmento}"])
-    
+
     def _calculate_market_momentum(self, trend_analysis: Dict[str, Any]) -> str:
         """Calcula momentum geral do mercado"""
-        
+
         if not trend_analysis:
             return "Estável"
-        
-        high_impact_trends = sum(1 for trend in trend_analysis.values() 
+
+        high_impact_trends = sum(1 for trend in trend_analysis.values()
                                if trend.get("impacto_esperado") in ["Alto", "disruptivo", "transformacional"])
-        
+
         total_trends = len(trend_analysis)
-        
+
         if high_impact_trends / total_trends > 0.6:
             return "Aceleração Exponencial"
         elif high_impact_trends / total_trends > 0.3:
             return "Crescimento Acelerado"
         else:
             return "Evolução Gradual"
-    
+
     def _calculate_change_velocity(self, trend_analysis: Dict[str, Any]) -> str:
         """Calcula velocidade de mudança"""
-        
+
         if not trend_analysis:
             return "Lenta"
-        
-        fast_trends = sum(1 for trend in trend_analysis.values() 
+
+        fast_trends = sum(1 for trend in trend_analysis.values()
                          if "2024" in trend.get("timeline", ""))
-        
+
         total_trends = len(trend_analysis)
-        
+
         if fast_trends / total_trends > 0.5:
             return "Muito Rápida"
         elif fast_trends / total_trends > 0.3:
             return "Rápida"
         else:
             return "Moderada"
-    
+
     def _calculate_opportunity_window(self, trend_analysis: Dict[str, Any]) -> str:
         """Calcula janela de oportunidade"""
-        
+
         if not trend_analysis:
             return "Indefinida"
-        
-        early_stage_trends = sum(1 for trend in trend_analysis.values() 
+
+        early_stage_trends = sum(1 for trend in trend_analysis.values()
                                if trend.get("fase_atual") in ["crescimento", "adocao_inicial", "emergente"])
-        
+
         total_trends = len(trend_analysis)
-        
+
         if early_stage_trends / total_trends > 0.6:
             return "Ampla (12-36 meses)"
         elif early_stage_trends / total_trends > 0.3:
             return "Moderada (6-18 meses)"
         else:
             return "Estreita (3-12 meses)"
-    
+
     def _calculate_doubling_time(self, growth_rate: float) -> float:
         """Calcula tempo para dobrar o mercado"""
         import math
         return math.log(2) / math.log(1 + growth_rate)
-    
+
     def _calculate_10x_timeline(self, growth_rate: float) -> float:
         """Calcula tempo para mercado crescer 10x"""
         import math
         return math.log(10) / math.log(1 + growth_rate)
-    
+
     def _create_scenario_timeline(self, scenario: Dict[str, Any], horizon_months: int) -> Dict[str, Any]:
         """Cria timeline específica para cenário"""
-        
+
         timeline = {}
         months_per_quarter = 3
         quarters = horizon_months // months_per_quarter
-        
+
         for quarter in range(1, quarters + 1):
             timeline[f"Q{quarter}"] = {
                 "desenvolvimentos_esperados": [
@@ -908,12 +941,12 @@ class FuturePredictionEngine:
                     "Alertas de desvio de rota"
                 ]
             }
-        
+
         return timeline
-    
+
     def _create_early_indicators(self, scenario: Dict[str, Any], segmento: str) -> List[str]:
         """Cria indicadores antecipados para cenário"""
-        
+
         return [
             f"Mudanças no investimento VC em {segmento}",
             f"Lançamentos de produtos inovadores no {segmento}",
@@ -924,10 +957,10 @@ class FuturePredictionEngine:
             f"Mudanças macroeconômicas que afetam {segmento}",
             f"Tendências globais que impactam {segmento}"
         ]
-    
+
     def _create_scenario_action_plan(self, scenario: Dict[str, Any], segmento: str) -> Dict[str, Any]:
         """Cria plano de ação para cenário específico"""
-        
+
         return {
             "preparacao": [
                 f"Desenvolver capacidades necessárias para {scenario['nome']} no {segmento}",
@@ -948,10 +981,10 @@ class FuturePredictionEngine:
                 "Preparar para próxima fase de evolução"
             ]
         }
-    
+
     def _analyze_opportunity_viability(self, opportunity: Dict[str, Any], segmento: str) -> Dict[str, Any]:
         """Analisa viabilidade de oportunidade"""
-        
+
         return {
             "viabilidade_tecnica": "Alta - Tecnologias disponíveis e maduras",
             "viabilidade_financeira": f"Média-Alta - ROI de {opportunity.get('roi_esperado', '200-400%')}",
@@ -961,10 +994,10 @@ class FuturePredictionEngine:
             "score_geral": 8.2,
             "recomendacao": "Implementar com prioridade alta"
         }
-    
+
     def _create_opportunity_roadmap(self, opportunity: Dict[str, Any]) -> Dict[str, Any]:
         """Cria roadmap para oportunidade"""
-        
+
         return {
             "fase_1_validacao": {
                 "duracao": "1-3 meses",
@@ -985,10 +1018,10 @@ class FuturePredictionEngine:
                 "criterios_sucesso": ["Market fit", "Crescimento sustentável", "Rentabilidade"]
             }
         }
-    
+
     def _define_opportunity_metrics(self, opportunity: Dict[str, Any]) -> Dict[str, Any]:
         """Define métricas de sucesso para oportunidade"""
-        
+
         return {
             "metricas_validacao": [
                 "Taxa de interesse do mercado",
@@ -1008,6 +1041,85 @@ class FuturePredictionEngine:
                 "ROI do investimento",
                 "Sustentabilidade competitiva"
             ]
+        }
+
+    def _predict_short_term(self, segmento: str, context_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Predições de curto prazo (6 meses)"""
+        return {
+            'growth_rate': '15-25%',
+            'key_trends': [f'Digitalização acelerada em {segmento}', 'Automação de processos'],
+            'opportunities': [f'Nichos emergentes em {segmento}', 'Parcerias estratégicas'],
+            'threats': ['Aumento da concorrência', 'Pressão de preços']
+        }
+
+    def _predict_medium_term(self, segmento: str, context_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Predições de médio prazo (18 meses)"""
+        return {
+            'growth_rate': '25-40%',
+            'key_trends': [f'IA integrada em {segmento}', 'Personalização massiva'],
+            'opportunities': [f'Liderança em {segmento}', 'Expansão geográfica'],
+            'threats': ['Disrupção tecnológica', 'Mudanças regulatórias']
+        }
+
+    def _predict_long_term(self, segmento: str, context_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Predições de longo prazo (36 meses)"""
+        return {
+            'growth_rate': '50-100%',
+            'key_trends': [f'Transformação completa de {segmento}', 'Novos modelos de negócio'],
+            'opportunities': [f'Dominância em {segmento}', 'Criação de ecossistema'],
+            'threats': ['Obsolescência de modelos atuais', 'Entrada de gigantes tech']
+        }
+
+    def _predict_disruptive_events(self, segmento: str) -> List[Dict[str, Any]]:
+        """Prediz eventos disruptivos"""
+        return [
+            {
+                'evento': f'IA revoluciona {segmento}',
+                'probabilidade': 0.75,
+                'impacto': 'Transformacional',
+                'timeline': '12-24 meses'
+            },
+            {
+                'evento': f'Nova regulamentação em {segmento}',
+                'probabilidade': 0.45,
+                'impacto': 'Significativo',
+                'timeline': '6-18 meses'
+            }
+        ]
+
+    def _identify_opportunity_windows(self, segmento: str) -> List[Dict[str, Any]]:
+        """Identifica janelas de oportunidade"""
+        return [
+            {
+                'janela': f'Primeiros em IA para {segmento}',
+                'abertura': 'Próximos 6 meses',
+                'fechamento': '18 meses',
+                'potencial': 'Muito Alto'
+            },
+            {
+                'janela': f'Consolidação de {segmento}',
+                'abertura': '12 meses',
+                'fechamento': '36 meses',
+                'potencial': 'Alto'
+            }
+        ]
+
+    def _predict_competitive_changes(self, segmento: str) -> Dict[str, Any]:
+        """Prediz mudanças competitivas"""
+        return {
+            'novos_entrantes': f'3-5 novos players em {segmento}',
+            'consolidacao': f'2-3 fusões principais em {segmento}',
+            'saidas': f'10-15% dos atuais players de {segmento}',
+            'mudanca_lideranca': 'Possível mudança nos top 3'
+        }
+
+    def _fallback_predictions(self, segmento: str) -> Dict[str, Any]:
+        """Predições básicas como fallback"""
+        return {
+            'growth_projection': f'{segmento} crescerá 20-30% ao ano',
+            'key_trend': f'Digitalização de {segmento}',
+            'main_opportunity': f'Inovação em {segmento}',
+            'primary_threat': 'Aumento da concorrência'
         }
 
 # Instância global

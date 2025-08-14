@@ -18,6 +18,7 @@ from services.visual_proofs_generator import visual_proofs_generator
 from services.anti_objection_system import anti_objection_system
 from services.pre_pitch_architect import pre_pitch_architect
 from services.future_prediction_engine import future_prediction_engine
+from services.pitch_master_architect import pitch_master_architect
 
 logger = logging.getLogger(__name__)
 
@@ -103,6 +104,12 @@ class UltraDetailedAnalysisEngine:
             # 7. PREDIÇÕES FUTURAS - OBRIGATÓRIAS
             future_predictions = self._execute_future_predictions(data)
 
+            if progress_callback:
+                progress_callback(15, "🎯 Criando sistema de pitch devastador...")
+
+            # 8. SISTEMA DE PITCH COMPLETO - NOVO
+            pitch_system = self._execute_pitch_system(data, avatar_data, drivers_data)
+
             # CONSOLIDAÇÃO FINAL
             gigantic_analysis = {
                 "tipo_analise": "GIGANTE_ULTRA_DETALHADO",
@@ -114,6 +121,7 @@ class UltraDetailedAnalysisEngine:
                 "sistema_anti_objecao": anti_objection,
                 "pre_pitch_invisivel": pre_pitch_data,
                 "predicoes_futuro_detalhadas": future_predictions,
+                "sistema_pitch_devastador": pitch_system,
                 "arsenal_completo": True,
                 "fallback_mode": False
             }
@@ -346,6 +354,40 @@ class UltraDetailedAnalysisEngine:
             raise Exception("❌ Falha na geração do pré-pitch")
 
         return pre_pitch_result
+
+    def _execute_pitch_system(
+        self, 
+        data: Dict[str, Any], 
+        avatar_data: Dict[str, Any], 
+        drivers_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Executa sistema completo de pitch - NOVO"""
+
+        logger.info("🎯 Executando sistema completo de pitch devastador...")
+
+        try:
+            pitch_system = pitch_master_architect.create_complete_pitch_system(
+                data, avatar_data, drivers_data
+            )
+
+            if not pitch_system:
+                raise Exception("❌ Falha na geração do sistema de pitch")
+
+            logger.info("✅ Sistema de pitch devastador criado com sucesso")
+            return pitch_system
+
+        except Exception as e:
+            logger.error(f"❌ Erro ao criar sistema de pitch: {e}")
+            return {
+                "erro": str(e),
+                "pitch_basico": f"Sistema básico de vendas para {data.get('segmento', 'produto')}",
+                "conversao_esperada": "15-25%",
+                "melhorias_necessarias": [
+                    "Implementar análise completa de avatar",
+                    "Desenvolver drives mentais customizados",
+                    "Criar sistema de garantias múltiplas"
+                ]
+            }
 
     def _execute_future_predictions(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Executa predições futuras - OBRIGATÓRIAS"""
